@@ -66,5 +66,12 @@ exports.post_update_put = function (req, res, next) {
 ///
 
 exports.post_detail = function (req, res, next) {
+  Post.findById(req.params.id)
+  .exec(function (err, post) {
+    if (err) {
+      return next(err);
+    }
 
+    res.json(post);
+  });
 };

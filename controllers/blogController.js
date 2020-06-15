@@ -34,9 +34,11 @@ exports.blog_create_get = function (req, res, next) {
 /// BLOG CREATE POST
 ///
 
-exports.blog_create_post = function (req, res, next) {
-
-};
+exports.blog_create_post = [
+  (req, res, next) => {
+    res.json(req.user);
+  },
+];
 
 ///
 /// BLOG DELETE
@@ -67,5 +69,12 @@ exports.blog_update_put = function (req, res, next) {
 ///
 
 exports.blog_detail = function (req, res, next) {
+  Blog.findById(req.params.id)
+  .exec(function (err, blog) {
+    if (err) {
+      return next(err);
+    }
 
+    res.json(blog);
+  });
 };

@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 const dotenv = require('dotenv');
 dotenv.config();
+const passport = require('./passport');
 
 let MONGODB_URI = process.env.MONGODB_SECRET;
 
@@ -26,6 +27,7 @@ app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(passport.initialize());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

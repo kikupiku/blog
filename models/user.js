@@ -20,4 +20,10 @@ UserSchema
   return '/users/' + this._id;
 });
 
+UserSchema
+.virtual('attributes')
+.get(function () {
+  return { firstName: this.firstName, lastName: this.lastName, email: this.email, id: this._id };
+});
+
 module.exports = mongoose.model('User', UserSchema);
