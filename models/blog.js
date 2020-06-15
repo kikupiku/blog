@@ -12,4 +12,4 @@ BlogSchema
   return '/blogs/' + this._id;
 });
 
-module.exports = mongoole.model('Blog', BlogSchema);
+module.exports = mongoose.model('Blog', BlogSchema);
