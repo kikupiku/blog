@@ -20,7 +20,7 @@ router.get('/users', userController.user_list);
 router.post('/users/login', userController.user_login);
                                                     //do i need a logout post/get?
 router.post('/users', userController.user_create_post);
-router.delete('/users/:id/delete', userController.user_delete_delete);
+router.delete('/users/:id', userController.user_delete_delete);
 // router.get('/users/:id/update', userController.user_update_get);
 router.put('/users/:id', userController.user_update_put);
 router.get('/users/:id', userController.user_detail);
@@ -32,7 +32,9 @@ router.get('/users/:userId/blogs', blogController.blog_list);
 router.post('/users/:userId/blogs', passport.authenticate('jwt', {
   session: false,
 }), blogController.blog_create_post);
-router.delete('/users/:userId/blogs/:id/delete', blogController.blog_delete_delete);
+router.delete('/users/:userId/blogs/:id', passport.authenticate('jwt', {
+  session: false,
+}), blogController.blog_delete_delete);
 // router.get('/users/:userId/blogs/:id/update', blogController.blog_update_get);
 router.put('/users/:userId/blogs/:id', passport.authenticate('jwt', {
   session: false,
@@ -43,18 +45,30 @@ router.get('/users/:userId/blogs/:id', blogController.blog_detail);
 
 router.get('/blogs/:blogId/posts', postController.post_list);
 // router.get('/blogs/:blogId/posts/create', postController.post_create_get);
-router.post('/blogs/:blogId/posts', postController.post_create_post);
-router.delete('/blogs/:blogId/posts/:id/delete', postController.post_delete_delete);
+router.post('/blogs/:blogId/posts', passport.authenticate('jwt', {
+  session: false,
+}), postController.post_create_post);
+router.delete('/blogs/:blogId/posts/:id', passport.authenticate('jwt', {
+  session: false,
+}), postController.post_delete_delete);
 // router.get('/blogs/:blogId/posts/:id/update', postController.post_update_get);
-router.put('/blogs/:blogId/posts/:id', postController.post_update_put);
+router.put('/blogs/:blogId/posts/:id', passport.authenticate('jwt', {
+  session: false,
+}), postController.post_update_put);
 router.get('/blogs/:blogId/posts/:id', postController.post_detail);
 
 /// COMMENT ROUTES ///
 
 // router.get('/posts/:postId/comments/create', commentController.comment_create_get);
-router.post('/posts/:postId/comments', commentController.comment_create_post);
-router.delete('/posts/:postId/comments/:id/delete', commentController.comment_delete_delete);
+router.post('/blogs/:blogId/posts/:postId/comments', passport.authenticate('jwt', {
+  session: false,
+}), commentController.comment_create_post);
+router.delete('/blogs/:blogId/posts/:postId/comments/:id', passport.authenticate('jwt', {
+  session: false,
+}), commentController.comment_delete_delete);
 // router.get('/posts/:postId/comments/:id/update', commentController.comment_update_get);
-router.put('/posts/:postId/comments/:id', commentController.comment_update_put);
+router.put('/blogs/:blogId/posts/:postId/comments/:id', passport.authenticate('jwt', {
+  session: false,
+}), commentController.comment_update_put);
 
 module.exports = router;

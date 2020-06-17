@@ -143,7 +143,6 @@ exports.user_delete_delete = function (req, res, next) {
     postsOfUser: function (callback) {
       Post.find({ 'postAuthor': req.params.id })
       .populate('postAuthor')
-      .populate('comments')
       .exec(callback);
     },
 
@@ -155,32 +154,40 @@ exports.user_delete_delete = function (req, res, next) {
         if (err) {
           return next(err);
         }
-                               // soooooo, if I don't redirect, I do nothing here??
-                               // also, is it ok that I delete all trace of this user's activity like this?
-      });
-      results.blogsOfUser.forEach((blog) => {
-        Blog.findByIdAndRemove(blog.id, function deleteBlog(err) {
-          if (err) {
-            return next(err);
-          }
-        });
-      });
-      results.postsOfUser.forEach((post) => {
-        post.comments.forEach((comment) => {
-          Comment.findByIdAndRemove(comment.id, function deleteComment(err) {
+
+        results.blogsOfUser.forEach((blog) => {
+          Blog.findByIdAndRemove(blog.id, function deleteBlog(err) {
             if (err) {
               return next(err);
             }
           });
         });
 
-        Post.findByIdAndRemove(post.id, function deletePost(err) {
-          if (err) {
-            return next(err);
-          }
-        });
-      });
+        results.postsOfUser.forEach((post) => {
+          Post.findByIdAndRemove(post.id, function deletePost(err) {
+            if (err) {
+              return next(err);
+            }
+          });
 
+          Comment.find({ 'commentedPost': post.id })
+          .exec(function (err, commentToDelete) {
+            if (err) {
+              return next(err);
+            }
+
+            Comment.findByIdAndRemove(commentToDelete.id, function deleteComment(err) {
+              console.log('hi'); //// it does go here
+              if (err) {
+                return next(err);
+              }
+            });
+
+          });
+        });
+
+        return res.status(200);
+      });
     }
   });
 };
@@ -245,7 +252,7 @@ exports.user_update_put = [
               return next(err);
             }
 
-            res.json(updatedUser.attributes);
+            res.json(user.attributes);
           });
       }
     });
@@ -263,6 +270,10 @@ exports.user_detail = function (req, res, next) {
       return next(err);
     }
 
-    res.json(user.attributes);
+    if (!user) {
+      res.sendStatus(404);
+    } else {
+      res.json(user.attributes);
+    }
   });
 };
