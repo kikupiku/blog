@@ -150,43 +150,36 @@ exports.user_delete_delete = function (req, res, next) {
     if (err) {
       return next(err);
     } else {
-      User.findByIdAndRemove(req.params.id, function deleteUser(err) {
+      let userToDelete = results.user;
+      let blogIds = results.blogsOfUser.map(blog => blog.id);
+      let postIds = results.postsOfUser.map(post => post.id);
+
+      async.parallel({
+        blogs: function (callback) {
+          Blog.deleteMany({ '_id': { $in: blogIds } })
+          .exec(callback);
+        },
+
+        posts: function (callback) {
+          Post.deleteMany({ '_id': { $in: postIds } })
+          .exec(callback);
+        },
+
+        comments: function (callback) {
+          Comment.deleteMany({ 'commentedPost': { $in: postIds } })
+          .exec(callback);
+        },
+      }, function (err, stuffToDelete) {
         if (err) {
           return next(err);
         }
+        User.findByIdAndRemove(req.params.id, function deleteUser(err) {
+          if (err) {
+            return next(err);
+          }
 
-        results.blogsOfUser.forEach((blog) => {
-          Blog.findByIdAndRemove(blog.id, function deleteBlog(err) {
-            if (err) {
-              return next(err);
-            }
-          });
+          res.sendStatus(200);
         });
-
-        results.postsOfUser.forEach((post) => {
-          Post.findByIdAndRemove(post.id, function deletePost(err) {
-            if (err) {
-              return next(err);
-            }
-          });
-
-          Comment.find({ 'commentedPost': post.id })
-          .exec(function (err, commentToDelete) {
-            if (err) {
-              return next(err);
-            }
-
-            Comment.findByIdAndRemove(commentToDelete.id, function deleteComment(err) {
-              console.log('hi'); //// it does go here
-              if (err) {
-                return next(err);
-              }
-            });
-
-          });
-        });
-
-        return res.status(200);
       });
     }
   });

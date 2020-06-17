@@ -10,17 +10,38 @@ const { body, validationResult } = require('express-validator');
 ///
 
 exports.blog_list = function (req, res, next) {
-  Blog.find({})
+  Blog.find({ 'blogAuthor': req.params.userId })
+  .populate('blogAuthor')
   .sort([['blogTopic', 'ascending']])
   .exec(function (err, blogs) {
     if (err) {
       return next(err);
     }
+    if (blogs.length === 0) {
+      res.sendStatus(404);
+    } else {
 
-    res.json({
-      title: 'List of blogs',
-      blogs: blogs,
-    });
+      let author = blogs[0].blogAuthor.fullName;
+      let decoratedBlogs = blogs.map(blog => {
+        return {
+          _id: blog.id,
+          blogAuthor: {
+            _id: blog.blogAuthor.id,
+            firstName: blog.blogAuthor.firstName,
+            lastName: blog.blogAuthor.lastName,
+            email: blog.blogAuthor.email,
+          },
+          blogTopic: blog.blogTopic,
+          blogDescription: blog.blogDescription,
+        };
+      });
+
+      res.json({
+        author: author,
+        title: 'List of blogs',
+        blogs: decoratedBlogs,
+      });
+    }
   });
 };
 
