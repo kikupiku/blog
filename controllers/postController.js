@@ -10,7 +10,7 @@ const { body, validationResult } = require('express-validator');
 ///
 
 exports.post_list = function (req, res, next) {
-  Post.find({ 'blog': req.body.blogId })
+  Post.find({ 'blog': req.params.blogId })
   .exec(function (err, posts) {
     if (err) {
       return next(err);
